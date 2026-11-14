@@ -13,7 +13,7 @@ import app.morphe.patcher.patch.bytecodePatch
 private const val POLICY_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitPolicy;"
 private const val ENGINE_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitEngine;"
 
-private val COMPATIBILITY_WISPR_FLOW = mapOf("com.wispr.flowapp" to listOf("2.6.2"))
+private val COMPATIBILITY_WISPR_FLOW = "com.wispr.flowapp" to setOf("2.6.2")
 
 /**
  * `computeState(Z I J)` maps the plan plus the weekly word count onto

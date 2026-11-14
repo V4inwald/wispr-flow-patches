@@ -11,7 +11,7 @@ import app.morphe.patches.all.misc.fix.changepackageinstaller.changePackageInsta
 
 private const val PLAY_STORE = "com.android.vending"
 
-private val COMPATIBILITY_WISPR_FLOW = mapOf("com.wispr.flowapp" to listOf("2.6.2"))
+private val COMPATIBILITY_WISPR_FLOW = "com.wispr.flowapp" to setOf("2.6.2")
 
 /**
  * Makes the app report that it was installed from the Play Store.
