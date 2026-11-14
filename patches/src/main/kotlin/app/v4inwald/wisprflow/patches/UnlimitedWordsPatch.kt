@@ -8,15 +8,17 @@ package app.v4inwald.wisprflow.patches
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.bytecodePatch
 
 private const val POLICY_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitPolicy;"
 private const val ENGINE_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitEngine;"
 
+private val COMPATIBILITY_WISPR_FLOW = mapOf("com.wispr.flowapp" to listOf("2.6.2"))
+
 /**
  * `computeState(Z I J)` maps the plan plus the weekly word count onto
- * Warning / Exhausted / HardCapped. `computeGate` turns the returned state into a
- * `DictationGate`, and `DictationStartGate` refuses the dictation on anything but `Allow`.
+ * Warning / Exhausted / HardCapped. `computeGate` turns that state into a `DictationGate`, and
+ * `DictationStartGate` refuses the dictation on anything but `Allow`.
  */
 internal object WordLimitPolicyComputeStateFingerprint : Fingerprint(
     definingClass = POLICY_CLASS,
@@ -42,16 +44,16 @@ internal object WordLimitEngineResolveLimitedFingerprint : Fingerprint(
  *
  * Both hooks return a constant as the first instruction of the method, which leaves the original
  * logic in place but unreachable: `WordLimitState$None` for every caller, and `false` for the
- * engine, which is the state a plan would have if the quota did not exist.
+ * engine — the state a plan would have if the quota did not exist.
  */
 @Suppress("unused")
 val unlimitedWordsPatch =
-    patch(
+    bytecodePatch(
         name = "Unlimited words",
         description = "Removes the free-plan weekly word limit, so dictation keeps working past the quota.",
         default = true,
     ) {
-        compatibleWith("com.wispr.flowapp" to "2.6.2")
+        compatibleWith(COMPATIBILITY_WISPR_FLOW)
 
         execute {
             WordLimitPolicyComputeStateFingerprint.method.addInstructions(

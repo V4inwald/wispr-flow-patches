@@ -6,10 +6,12 @@
 
 package app.v4inwald.wisprflow.patches
 
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.fix.changepackageinstaller.changePackageInstallerPatch
-import app.morphe.patcher.patch.patch
 
 private const val PLAY_STORE = "com.android.vending"
+
+private val COMPATIBILITY_WISPR_FLOW = mapOf("com.wispr.flowapp" to listOf("2.6.2"))
 
 /**
  * Makes the app report that it was installed from the Play Store.
@@ -27,12 +29,12 @@ private const val PLAY_STORE = "com.android.vending"
  */
 @Suppress("unused")
 val playStoreSourcePatch =
-    patch(
+    bytecodePatch(
         name = "Play Store install source",
         description = "Reports the app as installed from the Play Store, so the bundled Play licensing check accepts a re-signed build.",
         default = true,
     ) {
-        compatibleWith("com.wispr.flowapp" to "2.6.2")
+        compatibleWith(COMPATIBILITY_WISPR_FLOW)
 
         dependsOn(
             changePackageInstallerPatch { PLAY_STORE },
