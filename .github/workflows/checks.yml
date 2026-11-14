@@ -28,12 +28,19 @@ jobs:
       - name: Syntax-check shell scripts
         run: for f in scripts/*.sh; do bash -n "$f"; done
 
+      - name: Scripts are executable
+        run: |
+          for f in scripts/*.sh gradlew; do
+            [ -x "$f" ] || { echo "not executable: $f"; exit 1; }
+          done
+
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
 
       - name: No application artefact is tracked
         run: |
-          found="$(git ls-files '*.apk' '*.dex' '*.jar' '*.jks' '*.keystore')"
+          found="$(git ls-files '*.apk' '*.dex' '*.jar' '*.jks' '*.keystore' \
+            | grep -v '^gradle/wrapper/gradle-wrapper.jar$' || true)"
           if [ -n "$found" ]; then
             echo "artefacts tracked in git:"; echo "$found"; exit 1
           fi
