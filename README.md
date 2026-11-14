@@ -76,10 +76,10 @@ These patches are for **personal, interoperable use on devices you own, on a cop
 you obtained yourself**. They change client-side logic only: no server is spoofed, nothing is
 redistributed, and no entitlement is invented. See [`DISCLAIMER.md`](DISCLAIMER.md).
 
-Everything here is verified offline — unit tests, a full build, and a check of the built dex
-and of the signed bundle. Device behaviour (does the app launch, does dictation survive past
-the quota) is the one thing no tool in this container can certify; the `docs`-free status is
-deliberately limited to what is actually observed.
+What is claimed here is what is observed offline: unit tests, a full build, a check of the
+injected instructions in the built dex, and a check that the signed bundle is complete and
+single-signed. Device behaviour — does the app launch, does dictation survive past the quota —
+is the one thing no tool in this container can certify, and is not claimed.
 
 ## Licence
 
