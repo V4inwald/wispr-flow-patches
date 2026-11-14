@@ -1,0 +1,98 @@
+{
+  "$schema": "See patches/README.md for the field reference.",
+  "name": "play-store-source",
+  "title": "Play Store install source",
+  "summary": "Reports the app as installed from the Play Store, so the bundled Play licensing check accepts a re-signed build.",
+  "compatibility": {
+    "package": "com.wispr.flowapp",
+    "version": "2.6.2",
+    "minSdk": 33,
+    "evidence": "WHY.md"
+  },
+  "hooks": [
+    {
+      "id": "LicenseClient.installingPackageName",
+      "kind": "callsite",
+      "class": "com/pairip/licensecheck/LicenseClient",
+      "why": "performLocalInstallerCheck compares this exact string against com.android.vending and returns false otherwise, which ends in the licensing error dialog. Every other site below only keeps the answer consistent.",
+      "method": ".method private performLocalInstallerCheck()Z",
+      "invoke": "Landroid/content/pm/InstallSourceInfo;->getInstallingPackageName()Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    },
+    {
+      "id": "PlayStoreInAppReview.installingPackageName",
+      "kind": "callsite",
+      "class": "com/wispr/ui/extension/PlayStoreInAppReviewKt",
+      "why": "The in-app review flow records the installer as part of its suppression token; without the spoof it takes the sideloaded branch on a patched build.",
+      "method": ".method private static final installerPackageName(Landroidx/activity/ComponentActivity;)Ljava/lang/String;",
+      "invoke": "Landroid/content/pm/InstallSourceInfo;->getInstallingPackageName()Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    },
+    {
+      "id": "AppsFlyer.getInitiatingPackageName",
+      "kind": "callsite",
+      "class": "com/appsflyer/internal/AFg1zSDK",
+      "why": "Attribution reads the initiating installer; a patched install must not be reported as an unknown store.",
+      "method": ".method private final getRevenue()Ljava/util/Map;",
+      "invoke": "Landroid/content/pm/InstallSourceInfo;->getInitiatingPackageName()Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    },
+    {
+      "id": "AppsFlyer.installingPackageName",
+      "kind": "callsite",
+      "class": "com/appsflyer/internal/AFg1zSDK",
+      "why": "Same metadata, second field: the SDK stores both the initiating and the installing installer.",
+      "method": ".method private final getRevenue()Ljava/util/Map;",
+      "invoke": "Landroid/content/pm/InstallSourceInfo;->getInstallingPackageName()Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    },
+    {
+      "id": "AppsFlyer.installerPackageName",
+      "kind": "callsite",
+      "class": "com/appsflyer/internal/AFg1zSDK",
+      "why": "Fallback path for API levels without InstallSourceInfo.",
+      "method": ".method public final AFAdRevenueData()Ljava/util/Map;",
+      "invoke": "Landroid/content/pm/PackageManager;->getInstallerPackageName(Ljava/lang/String;)Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    },
+    {
+      "id": "Firebase.installerPackageName",
+      "kind": "callsite",
+      "class": "com/google/firebase/FirebaseCommonRegistrar",
+      "why": "Firebase Analytics publishes an `installer` user property; leaving it unset splits the patched installs into the sideloaded bucket.",
+      "method": ".method private static synthetic lambda$getComponents$3(Landroid/content/Context;)Ljava/lang/String;",
+      "invoke": "Landroid/content/pm/PackageManager;->getInstallerPackageName(Ljava/lang/String;)Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    },
+    {
+      "id": "Sentry.installerPackageName",
+      "kind": "callsite",
+      "class": "io/sentry/android/core/ContextUtils",
+      "why": "Crash reports tag the installer; keeping it consistent avoids mixing patched and store crashes.",
+      "method": ".method public static retrieveSideLoadedInfo(Landroid/content/Context;Lio/sentry/ILogger;Lio/sentry/android/core/BuildInfoProvider;)Lio/sentry/android/core/ContextUtils$SideLoadedInfo;",
+      "invoke": "Landroid/content/pm/PackageManager;->getInstallerPackageName(Ljava/lang/String;)Ljava/lang/String;",
+      "result": "move-result-object",
+      "replace_with": "const-string",
+      "literal": "com.android.vending",
+      "expect": 1
+    }
+  ]
+}
