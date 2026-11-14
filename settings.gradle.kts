@@ -18,6 +18,9 @@ pluginManagement {
                 password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))
             }
         }
+        // baksmali/smali from source builds - https://github.com/iBotPeaches/smali
+        // Remove when official smali releases come out again.
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
