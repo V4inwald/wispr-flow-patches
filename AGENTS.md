@@ -31,6 +31,7 @@ built artefact, not on the sources they were applied to.
 | `README.md`, `WHY.md`, `DISCLAIMER.md` | what the project is, why the spoof is honest, what it does not do |
 | `analysis/` | evidence; append, and correct in place rather than re-narrating history |
 | `patches/<name>/` | manifest + README; both move together |
+| `patches/src/` | the Kotlin patch the Morphe bundle is built from — same hooks, same `compatibleWith` |
 | `scripts/` | pipeline; each stage fails closed |
 | `tests/` | synthetic fixtures only — must run with no APK and no toolchain |
 
@@ -39,7 +40,12 @@ built artefact, not on the sources they were applied to.
 ```bash
 python3 -m unittest discover -s tests          # before every commit
 scripts/build.sh /path/to/app.xapk             # before claiming a patch works
+./gradlew buildAndroid                         # before claiming the bundle builds
 ```
+
+A hook exists in two places by design: the JSON manifest drives the scripted pipeline, the Kotlin
+patch drives the bundle. Change both in the same commit, and keep the `expect` counts and the
+fingerprints equally strict.
 
 Commits: Conventional Commits, imperative, ≤72-character summary, body explains why.
 

@@ -1,0 +1,11 @@
+[versions]
+morphe-patcher = "1.14.0"
+morphe-patches-library = "1.9.0-dev.4"
+annotation = "1.10.0"
+
+[libraries]
+morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+
+[plugins]
+android-library = { id = "com.android.library" }

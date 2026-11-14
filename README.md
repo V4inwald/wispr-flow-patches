@@ -10,16 +10,34 @@ Patches for the **Wispr Flow** Android app (`com.wispr.flowapp`), published in t
 The repository contains **no application code**: no APK, no DEX, no decompiled sources. It
 carries tooling, the reverse-engineering evidence behind each hook, and the patches themselves.
 
-| Patch | What it changes | Standalone | Morphe port | Target |
+| Patch | What it changes | Standalone | Morphe | Target |
 |---|---|---|---|---|
-| [`unlimited-words`](patches/unlimited-words/) | stops the free-plan weekly word quota from gating dictation | yes | planned | 2.6.2 |
-| [`play-store-source`](patches/play-store-source/) | reports the app as installed by the Play Store | yes | planned | 2.6.2 |
+| `unlimited-words` | stops the free-plan weekly word quota from gating dictation | yes | yes | 2.6.2 |
+| `play-store-source` | reports the app as installed by the Play Store | yes | yes | 2.6.2 |
 
 Both are needed on a re-signed build: the app ships Play licensing, and without the second
 patch it refuses to run. [`WHY.md`](WHY.md) explains that chain and why spoofing the installer
 is the honest fix rather than a workaround.
 
-## Requirements
+## Patch on the phone with Morphe
+
+This is the short path: nothing to build, nothing to transfer.
+
+1. Install [Morphe](https://morphe.software) and open **Sources**, then **Add source**.
+2. Add the repository by its URL: `https://morphe.software/add-source?github=V4inwald/wispr-flow-patches`
+   (or paste `V4inwald/wispr-flow-patches` where the manager asks for a repository).
+3. Pick Wispr Flow in Morphe, keep both patches enabled, and patch the APK the manager selects.
+
+Morphe builds the bundle from [`patches/src`](patches/src) through the
+[`app.morphe.patches`](settings.gradle.kts) plugin and publishes it as a signed release asset;
+[`patches-bundle.json`](patches-bundle.json) is what the manager reads to find that asset. The
+signing key of the first bundle you install is pinned, so a later release signed with another key
+is refused.
+
+Two things the manager does that the scripted pipeline does not: it handles the split bundle
+itself, and it does the signing on your device. The result is the same two hooks.
+
+## Requirements for the scripted pipeline
 
 * Linux x86-64 (the bootstrap fetches Linux builds)
 * Python 3.11+
@@ -63,12 +81,18 @@ original bytes — `scripts/apply_patches.py --revert` undoes a build.
 ## Repository layout
 
 ```
-analysis/     reverse-engineering notes and the small tools that produced them
-patches/      the patches, as manifests shared by this pipeline and the Morphe port
-scripts/      bootstrap, preflight, decompile, apply, repack, sign, verify
-tools/        downloaded toolchain and local keystore (gitignored)
-tests/        unit tests over synthetic fixtures — no APK, no toolchain needed
+analysis/          reverse-engineering notes and the small tools that produced them
+patches/           the patches: JSON manifests (standalone) and Kotlin sources (Morphe)
+patches/src/       the Kotlin patches the Morphe bundle is built from
+scripts/           bootstrap, preflight, decompile, apply, repack, sign, verify
+tools/             downloaded toolchain and local keystore (gitignored)
+tests/             unit tests over synthetic fixtures — no APK, no toolchain needed
+.github/workflows/ build the bundle on pull requests, release it on main
 ```
+
+The two forms read from one source of truth each — the JSON manifest for the scripted pipeline,
+the Kotlin fingerprint for the bundle — and `scripts/verify_apk.py` checks the built dex against
+the manifest, so a hook cannot drift unnoticed in the pipeline it guards.
 
 ## Scope and limits
 
@@ -83,5 +107,5 @@ is the one thing no tool in this container can certify, and is not claimed.
 
 ## Licence
 
-[Mozilla Public License 2.0](LICENSE). MPL-2.0 is compatible with the GPLv3 used by Morphe, so
-this code can be reused or upstreamed there.
+[GNU General Public License v3.0](LICENSE), like Morphe and its patch library, whose
+`changePackageInstallerPatch` the install-source patch depends on.

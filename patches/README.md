@@ -1,8 +1,15 @@
-# Patch manifests
+# Patches
 
 One directory per patch, each holding a `patch.json` manifest and a README. The manifest is
-the single source of truth: `scripts/apply_patches.py` applies it to a disassembly tree and
-`scripts/verify_apk.py` checks the built dex against it, so the two cannot drift.
+the source of truth for the scripted pipeline: `scripts/apply_patches.py` applies it to a
+disassembly tree and `scripts/verify_apk.py` checks the built dex against it, so the two cannot
+drift.
+
+The same hook also exists as Kotlin under `src/main/kotlin/app/v4inwald/wisprflow/patches/`, which
+is what the [Morphe bundle](../README.md#patch-on-the-phone-with-morphe) is built from. Both
+declarations are strict — literal anchors with an exact site count on one side, an exact
+`definingClass`/`name` fingerprint on the other — so a version change fails both loudly instead of
+applying a hook to moved code.
 
 ## Manifest
 
