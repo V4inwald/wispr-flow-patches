@@ -1,0 +1,7 @@
+{
+  "created_at": "2026-11-14T21:11:00",
+  "description": "## 1.0.0 (2026-11-14)\n\n### 🐛 Bug Fixes\n\n* **bundle:** pass compatibility as a package/versions pair ([31bdf34](https://github.com/V4inwald/wispr-flow-patches/commit/31bdf34959ebf1e1f704354f9d9f6f8b30ad8bcb))\n* **bundle:** use bytecodePatch, this patcher version's entry point ([6edb7f0](https://github.com/V4inwald/wispr-flow-patches/commit/6edb7f0b3641fdcc7099dd0deabd8186c5c89ad5))\n\n### ✨ New Features\n\n* **bundle:** publish a Morphe patch bundle ([ddf0aa1](https://github.com/V4inwald/wispr-flow-patches/commit/ddf0aa1eaa269500ac4ac04b2b38da45d578f03d))",
+  "download_url": "https://github.com/V4inwald/wispr-flow-patches/releases/download/v1.0.0/patches-1.0.0.mpp",
+  "signature_download_url": "",
+  "version": "1.0.0"
+}
