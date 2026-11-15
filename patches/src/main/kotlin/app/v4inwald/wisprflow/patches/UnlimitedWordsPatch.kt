@@ -11,19 +11,23 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
+import app.morphe.patcher.patch.FormFactor
 import app.morphe.patcher.patch.bytecodePatch
 
 private const val POLICY_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitPolicy;"
 private const val ENGINE_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitEngine;"
 
 private val COMPATIBILITY_WISPR_FLOW = Compatibility(
-    name = "Wispr Flow",
     packageName = "com.wispr.flowapp",
+    name = "Wispr Flow",
+    description = "Dictation app that inserts text with an accessibility service.",
     // The app ships as a split bundle: a base APK alone fails INSTALL_FAILED_MISSING_SPLIT.
     apkFileType = ApkFileType.APKM,
-    appIconColor = 0xFF1F1F1F,
+    appIconColor = 0xFF1F1F1F.toInt(),
     signatures = setOf("0f0f93d294c479ccd0ddce1bad232af5640c1faaa468612869c2208d7714c432"),
     targets = listOf(AppTarget(version = "2.6.2", minSdk = 33)),
+    formFactor = FormFactor.MOBILE,
+    isLegacy = false,
 )
 
 /**
