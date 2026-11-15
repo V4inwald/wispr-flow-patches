@@ -10,7 +10,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.patch
-import app.morphe.util.returnEarly
+import app.morphe.patcher.util.returnEarly
 import app.v4inwald.wisprflow.patches.Constants.COMPATIBILITY_WISPR_FLOW
 import com.android.tools.smali.dexlib2.Opcode
 
