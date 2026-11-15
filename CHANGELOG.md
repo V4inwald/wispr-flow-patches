@@ -1,3 +1,9 @@
+## [1.3.0-dev.4](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.3...v1.3.0-dev.4) (2026-11-15)
+
+### 🐛 Bug Fixes
+
+* **bundle:** republish the patch list without the withdrawn patch ([9c8bd22](https://github.com/V4inwald/wispr-flow-patches/commit/9c8bd227002520e28da786b2cbc858c8dd3153e7))
+
 ## [1.3.0-dev.3](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-11-15)
 
 ### ✨ New Features
