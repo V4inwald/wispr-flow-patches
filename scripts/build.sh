@@ -67,20 +67,35 @@ root, apk, decoded, work, api, apktool, java = sys.argv[1:8]
 decoded = Path(decoded)
 
 hooks = []
-for manifest in sorted(Path(root, "patches").glob("*/patch.json")):
-    hooks += json.loads(manifest.read_text(encoding="utf-8"))["hooks"]
+for path in sorted(Path(root, "patches").glob("*/patch.json")):
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    for hook in manifest["hooks"]:
+        # the file name is the declaration, the "name" field is the patch
+        hook["patch"] = manifest["name"]
+        hooks.append(hook)
 
-built = {}
+# Which dex trees did the run write to? A class hook names its class; a global hook
+# carries no class, so the trees are read back from the markers it left behind.
+touched: set[str] = set()
 for hook in hooks:
-    # Which dex *defines* the class? The descriptor also appears in dex files that
-    # merely reference it, so ask the decompiled tree, which is one file per definition.
+    if hook.get("kind") == "callsite-global":
+        marker = f"# patch:{hook['patch']}:{hook['id']}"
+        for path in decoded.glob("smali*/**/*.smali"):
+            if marker in path.read_text(encoding="utf-8"):
+                touched.add(path.relative_to(decoded).parts[0])
+        continue
+    # The descriptor also appears in dex files that merely reference the class, so ask
+    # the decompiled tree, which is one file per definition.
     trees = sorted(decoded.glob(f"smali*/{hook['class']}.smali"))
     if not trees:
         sys.exit(f"error: {hook['class']} not found in the decompiled tree")
     if len(trees) > 1:
         sys.exit(f"error: {hook['class']} is defined in {len(trees)} smali trees")
+    touched.add(trees[0].relative_to(decoded).parts[0])
+
+built = {}
+for tree in sorted(touched):
     # apktool names the first dex tree "smali", the others "smali_classesN".
-    tree = trees[0].relative_to(decoded).parts[0]
     smali_dir = decoded / tree
     suffix = tree[len("smali_classes"):] if tree != "smali" else ""
     entry = f"classes{suffix}.dex" if suffix else "classes.dex"

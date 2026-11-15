@@ -119,6 +119,57 @@ def write_disassembler(workdir: Path, apktool_jar: Path, sep: str) -> Path:
 
 # --------------------------------------------------------------------------- main
 
+def _verify_global(
+    hook: dict,
+    entries: dict[str, bytes],
+    tmp: Path,
+    java: Path,
+    apktool_jar: Path,
+    results: list[dict],
+    failures: list[str],
+) -> None:
+    """Check a tree-wide hook: the sites must be exactly the declared ones, each answered."""
+    served = f'{hook["replace_with"]} '
+    value = hook["literal"] if not hook["replace_with"].startswith("const-string") else f'"{hook["literal"]}"'
+    hits: list[str] = []
+    wrong: list[str] = []
+    dexes: set[str] = set()
+    for name in sorted(n for n in entries if n.endswith(".dex")):
+        out_dir = tmp / f"global-{hook['id']}-{name}"
+        disassemble_dex(java, apktool_jar, _stage(tmp, name, entries[name]), out_dir)
+        for smali in sorted(out_dir.rglob("*.smali")):
+            lines = smali.read_text(encoding="utf-8").splitlines()
+            for i, line in enumerate(lines):
+                if not line.strip().endswith(hook["invoke"]):
+                    continue
+                hits.append(f"{smali.stem}:{name}")
+                dexes.add(name)
+                # the marker comment sits between the call and the answer
+                got = "<empty>"
+                for follow in lines[i + 1:]:
+                    stripped = follow.strip()
+                    if stripped and not stripped.startswith("#"):
+                        got = stripped
+                        break
+                if not (got.startswith(served) and got.endswith(value)):
+                    wrong.append(f"{smali.stem}:{i} -> {got!r}")
+    ok = len(hits) == hook["expect"] and not wrong
+    results.append(
+        {
+            "hook": hook["id"],
+            "call_sites": len(hits),
+            "expected_sites": hook["expect"],
+            "replacement": [],
+            "dexes": sorted(dexes),
+            "ok": ok,
+        }
+    )
+    if len(hits) != hook["expect"]:
+        failures.append(f"{hook['id']}: {len(hits)} call site(s) in the built APK, {hook["expect"]} expected")
+    for problem in wrong:
+        failures.append(f"{hook['id']}: site not answered {problem}")
+
+
 def _stage(tmp: Path, name: str, data: bytes) -> Path:
     path = tmp / f"staged-{name}"
     if not path.exists():
@@ -179,6 +230,10 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="verify-apk-") as tmpdir:
         tmp = Path(tmpdir)
         for hook in hooks:
+            if hook.get("kind") == "callsite-global":
+                _verify_global(hook, entries, tmp, java, apktool_jar, results, failures)
+                continue
+
             # The dex string table stores JVM descriptors, with the leading L and
             # trailing semicolon: Lcom/example/Foo;
             descriptor = f"L{hook['class']};".encode()
@@ -281,6 +336,8 @@ def main() -> int:
         with zipfile.ZipFile(a.source_apk) as src_zip:
             src_entries = {i.filename: src_zip.read(i.filename) for i in src_zip.infolist()}
         patched_dexes = {r["dex"] for r in results if "dex" in r}
+        # a global hook reports every dex it wrote to, since it names no class
+        patched_dexes |= {d for r in results for d in r.get("dexes", [])}
         changed = []
         for name, data in entries.items():
             if name.startswith("META-INF/") or name.endswith((".SF", ".RSA", ".DSA")):
@@ -306,11 +363,17 @@ def main() -> int:
             if "hook" in r and "first_instruction" in r:
                 mark = "OK  " if r["ok"] else "FAIL"
                 print(f"  {mark} {r['hook']} [{r['dex']}] first instruction: {r['first_instruction']}")
-            elif "hook" in r:
+            elif "hook" in r and "dex" in r:
                 mark = "OK  " if r["ok"] else "FAIL"
                 print(
                     f"  {mark} {r['hook']} [{r['dex']}] "
                     f"{r['call_sites']}/{r['expected_sites']} call site(s) answered: {r['replacement']}"
+                )
+            elif "hook" in r:
+                mark = "OK  " if r["ok"] else "FAIL"
+                print(
+                    f"  {mark} {r['hook']} (whole tree) "
+                    f"{r['call_sites']}/{r['expected_sites']} call site(s) answered"
                 )
             else:
                 state = "OK  " if r["ok"] else "FAIL"

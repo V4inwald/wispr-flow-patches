@@ -121,14 +121,20 @@ def _callsite_pattern(hook: dict) -> re.Pattern[str]:
     )
 
 
+def _callsite_value(hook: dict) -> str:
+    """The operand written after the replacement opcode: quoted for strings, bare otherwise."""
+    if hook["replace_with"].startswith("const-string"):
+        return '"' + hook["literal"].replace('"', '\\"') + '"'
+    return str(hook["literal"])
+
+
 def _callsite_block(hook: dict, match: re.Match[str]) -> str:
     """The call is kept; only its result is replaced, and a marker says so."""
-    literal = hook["literal"].replace('"', '\\"')
     return (
         f"{match.group('indent')}{match.group('call')}\n"
         f"{match.group('blank')}"
         f"{match.group('indent')}# {hook['marker']}\n"
-        f"{match.group('indent2')}{hook['replace_with']} {match.group('reg')}, \"{literal}\"\n"
+        f"{match.group('indent2')}{hook['replace_with']} {match.group('reg')}, {_callsite_value(hook)}\n"
     )
 
 
@@ -138,9 +144,9 @@ def _callsite_revert_pattern(hook: dict) -> re.Pattern[str]:
         + re.escape(hook["marker"])
         + r"\n(?P<indent2>[ \t]*)"
         + re.escape(hook["replace_with"])
-        + r" (?P<reg>v\d+|p\d+), \""
-        + re.escape(hook["literal"])
-        + r"\"\n",
+        + r" (?P<reg>v\d+|p\d+), "
+        + re.escape(_callsite_value(hook))
+        + r"\n",
         re.MULTILINE,
     )
 
@@ -180,6 +186,71 @@ def apply_callsite_hook(path: Path, hook: dict, text: str, *, revert: bool) -> s
     return text[:start] + patched + text[end:]
 
 
+# ------------------------------------------------------------------ global call-site hooks
+
+def apply_callsite_global(decoded: Path, hook: dict, *, revert: bool, dry_run: bool) -> str:
+    """Answer every matching call site in the whole tree, whatever class holds it.
+
+    Used for platform APIs an app reads from vendored SDKs whose class names are obfuscated
+    and change between versions: naming a class would mean re-deriving a name that carries no
+    meaning. The declared `expect` is the total across the tree, so a version that adds or
+    drops a site still fails loudly.
+    """
+    marker = f"# {hook['marker']}"
+    expected = hook["expect"]
+    pattern = _callsite_pattern(hook)
+    revert_pattern = _callsite_revert_pattern(hook)
+
+    files = sorted(decoded.glob("smali*/**/*.smali"))
+    if not files:
+        raise PatchError(f"{hook['id']}: no smali file under {decoded}")
+
+    pending: list[tuple[Path, str]] = []
+    seen = 0
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        present = text.count(marker)
+        if revert:
+            if not present:
+                continue
+            reverted = revert_pattern.sub(
+                lambda m: f"{m.group('indent2')}{hook['result']} {m.group('reg')}\n", text
+            )
+            if reverted == text:
+                raise PatchError(f"{hook['id']}: revert produced no change in {path.name}")
+            pending.append((path, reverted))
+            seen += present
+            continue
+
+        found = list(pattern.finditer(text))
+        if present and not found:
+            # already answered here: the result move is gone, only the marker is left
+            seen += present
+            continue
+        if not found:
+            continue
+        if present == len(found):
+            seen += present
+            continue
+        pending.append((path, pattern.sub(lambda m: _callsite_block(hook, m), text)))
+        seen += len(found)
+
+    # A wrong count is a failure even when nothing is left to write: it means the target
+    # moved, not that the patch is in place.
+    if seen != expected:
+        found_text = "no call to" if seen == 0 else f"{seen} call site(s) found"
+        raise PatchError(
+            f"{hook['id']}: {found_text} {hook['invoke']} across the tree, {expected} expected — "
+            "the target changed, the patch needs updating"
+        )
+    if not pending:
+        return "skip (already applied)" if not revert else "skip (not applied)"
+    if not dry_run:
+        for path, text in pending:
+            path.write_text(text, encoding="utf-8")
+    return "reverted" if revert else "applied"
+
+
 # ---------------------------------------------------------------------------------- driver
 
 def apply_hook(decoded: Path, hook: dict, *, revert: bool, dry_run: bool) -> str:
@@ -188,8 +259,11 @@ def apply_hook(decoded: Path, hook: dict, *, revert: bool, dry_run: bool) -> str
     scope = hook.get("patch", "test")
     hook = {**hook, "marker": hook.get("marker") or f"patch:{scope}:{hook['id']}"}
     kind = hook.get("kind", "anchor")
-    if kind not in ("anchor", "callsite"):
+    if kind not in ("anchor", "callsite", "callsite-global"):
         raise PatchError(f"{hook['id']}: unknown hook kind {kind!r}")
+
+    if kind == "callsite-global":
+        return apply_callsite_global(decoded, hook, revert=revert, dry_run=dry_run)
 
     path = class_file(decoded, hook["class"])
     text = path.read_text(encoding="utf-8")

@@ -4,8 +4,9 @@ Makes the app report that it was installed from the Play Store, which is what it
 Play licensing check accepts.
 
 * **Package**: `com.wispr.flowapp`
-* **Target version**: 2.6.2
-* **Evidence**: [`WHY.md`](../../WHY.md), [`analysis/wispr-flow-2.6.2.md`](../../analysis/wispr-flow-2.6.2.md) §4.4
+* **Target version**: 2.8.7
+* **Evidence**: [`WHY.md`](../../WHY.md), [`analysis/wispr-flow-2.6.2.md`](../../analysis/wispr-flow-2.6.2.md) §4.4,
+  [`analysis/wispr-flow-2.8.7.md`](../../analysis/wispr-flow-2.8.7.md) §2
 
 ## Why it is needed
 
@@ -20,28 +21,22 @@ rather than anything else.
 
 ## What the patch changes
 
-Seven call sites, across five classes. The call is kept; only the value it returns is
-replaced, with `com.android.vending`:
+Four signatures, ten call sites, answered across the whole tree. The call is kept; only the
+value it returns is replaced. Three of them answer `com.android.vending`; `getPackageSource`
+returns the integer `2` instead, because it is a number.
 
-| Class | Method | Sites | Role |
-|---|---|---|---|
-| `com/pairip/licensecheck/LicenseClient` | `performLocalInstallerCheck` | 1 | the gate that decides whether the app runs |
-| `com/wispr/ui/extension/PlayStoreInAppReviewKt` | `installerPackageName` | 1 | in-app review suppression token |
-| `com/appsflyer/internal/AFg1zSDK` | `getRevenue` | 2 | attribution reads the initiating and installing installer |
-| `com/appsflyer/internal/AFg1zSDK` | `AFAdRevenueData` | 1 | fallback for API levels without `InstallSourceInfo` |
-| `com/google/firebase/FirebaseCommonRegistrar` | `lambda$getComponents$3` | 1 | Firebase Analytics `installer` user property |
-| `io/sentry/android/core/ContextUtils` | `retrieveSideLoadedInfo` | 1 | crash-report tagging |
+| Signature | Sites | Role |
+|---|---|---|
+| `InstallSourceInfo.getInstallingPackageName()` | 4 | the licence gate that decides whether the app runs, plus review, telemetry and attribution |
+| `PackageManager.getInstallerPackageName(String)` | 4 | the pre-API-30 form of the same question, read by Sentry, AppsFlyer and obfuscated SDK code |
+| `InstallSourceInfo.getInitiatingPackageName()` | 1 | the neighbouring attribution field |
+| `InstallSourceInfo.getPackageSource()` | 1 | the numeric source, read by the install-source telemetry |
 
-The signatures are `PackageManager.getInstallerPackageName(String)`,
-`InstallSourceInfo.getInstallingPackageName()` and `InstallSourceInfo.getInitiatingPackageName()`.
-Any other call to those methods in a future version is left alone by design: the hooks name
-their class and method, so the patch never silently widens.
-
-## What it does not change
-
-* the signing certificate: the build stays locally signed, and the app is told so;
-* `RevenueCat` / the `flow_pro` entitlement: a purchase still governs what the account owns;
-* the quota logic, which is the [other patch](../unlimited-words/).
+**Why tree-wide and not per class.** From 2.8.7 the readers sit in classes whose names carry
+nothing (`n0`, `ln0`, `j65`) and change with every release. The hooks match the platform
+signature instead, and state how many sites the version had: a release that adds or drops one
+fails the patch rather than being half-applied. All ten sites were checked to query *this*
+package, which is what makes the wide answer safe.
 
 ## Applying it
 
@@ -50,6 +45,12 @@ python3 scripts/apply_patches.py --decoded build/decoded --only play-store-sourc
 python3 scripts/apply_patches.py --decoded build/decoded --only play-store-source
 python3 scripts/apply_patches.py --decoded build/decoded --only play-store-source --revert
 ```
+
+## What it does not change
+
+* the signing certificate: the build stays locally signed, and the app is told so;
+* `RevenueCat` / the `flow_pro` entitlement: a purchase still governs what the account owns;
+* the quota logic, which is the [other patch](../unlimited-words/).
 
 Unlike the quota patch, this one cannot be dropped from a build: without it a re-signed APK
 stops at the licensing dialog.
@@ -64,3 +65,5 @@ stops at the licensing dialog.
 * **The claim is only as good as the check.** If a future version verifies the signature on
   the client as well as the installer, this patch stops being sufficient — it does not become
   wrong, it becomes outgrown.
+* **The count is the guard.** A site count that no longer matches is a failure, not a partial
+  spoof. A new site reading another package would still be answered with the Play name.
