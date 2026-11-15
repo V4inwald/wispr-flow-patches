@@ -1,8 +1,8 @@
 {
-  "created_at": "2026-11-15T03:59:43",
-  "description": "## [1.2.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.1.0...v1.2.0-dev.1) (2026-11-15)\n\n### ✨ New Features\n\n* move to the 2.x patch generation and sign every release ([a512c7c](https://github.com/V4inwald/wispr-flow-patches/commit/a512c7c3e8868b1f5a758e24c208ebfab2c54be4))",
-  "download_url": "https://github.com/V4inwald/wispr-flow-patches/releases/download/v1.2.0-dev.1/patches-1.2.0-dev.1.mpp",
+  "created_at": "2026-11-15T04:00:28",
+  "description": "## [1.2.0](https://github.com/V4inwald/wispr-flow-patches/compare/v1.1.0...v1.2.0) (2026-11-15)\n\n### ✨ New Features\n\n* move to the 2.x patch generation and sign every release ([a512c7c](https://github.com/V4inwald/wispr-flow-patches/commit/a512c7c3e8868b1f5a758e24c208ebfab2c54be4))",
+  "download_url": "https://github.com/V4inwald/wispr-flow-patches/releases/download/v1.2.0/patches-1.2.0.mpp",
   "signature_download_url": "",
-  "version": "1.2.0-dev.1",
+  "version": "1.2.0",
   "public_key": "8FP2gX5Xo1QHoc0mYRcxKKKaywAZjEnHy+SB+8wcPbc="
 }
