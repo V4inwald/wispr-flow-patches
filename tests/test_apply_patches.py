@@ -312,8 +312,12 @@ class ManifestTest(unittest.TestCase):
         assert method_return == returned or returned.startswith(method_return[:-1]), (
             f"{hook['id']}: {returned} is not a {method_return}"
         )
-        # an injected block must end with a return of that type
-        assert "return-object" in hook["replacement"]
+        # A hook that returns something short-circuits the method and must say so.
+        # A hook on a void method only injects instructions, so no return is expected.
+        if returned != "V":
+            assert ("return-object" if returned.startswith("L") else "return ") in hook["replacement"], (
+                f"{hook['id']}: replacement does not return a {returned}"
+            )
         # the anchor must be part of the method body, not the method header
         assert hook["anchor"].strip() != hook["method"].strip()
 

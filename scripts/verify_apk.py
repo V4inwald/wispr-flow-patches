@@ -55,10 +55,19 @@ def method_body(smali: str, signature: str) -> list[str] | None:
     if start is None:
         return None
     body = []
+    in_annotation = False
     for line in lines[start:]:
         if line.startswith(".end method"):
             break
         stripped = line.strip()
+        # annotations open a method body before its .locals; they are not instructions
+        if stripped.startswith(".annotation"):
+            in_annotation = True
+            continue
+        if in_annotation:
+            if stripped.startswith(".end annotation"):
+                in_annotation = False
+            continue
         if not stripped or stripped.startswith(("#", ".registers", ".locals", ".line", ".param")):
             continue
         if stripped.startswith(":"):  # jump label
@@ -187,12 +196,16 @@ def load_hooks() -> list[dict]:
     return hooks
 
 
-def expected_field(hook: dict) -> str:
-    """The field the injected sget-object must reference, read from the replacement."""
-    match = re.search(r"sget-object\s+\w+,\s*(L[^;]+;->[A-Za-z0-9_$]+):", hook["replacement"])
-    if not match:
-        raise VerifyError(f"{hook['id']}: replacement has no sget-object instruction")
-    return match.group(1)
+def expected_first_instruction(hook: dict) -> str:
+    """The first real instruction of the injected block: what must open the body."""
+    for line in hook["replacement"].splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith(("#", ".locals", ".registers", ".line", ".param")):
+            continue
+        if stripped.startswith(":"):
+            continue
+        return stripped
+    raise VerifyError(f"{hook['id']}: replacement has no instruction")
 
 
 def main() -> int:
@@ -273,21 +286,21 @@ def main() -> int:
                 continue
 
             if hook.get("kind", "anchor") == "anchor":
-                want = expected_field(hook)
+                want = expected_first_instruction(hook)
                 got = body[0] if body else "<empty>"
-                ok = got.startswith("sget-object") and want in got
+                ok = got == want
                 results.append(
                     {
                         "hook": hook["id"],
                         "dex": entry_name,
                         "first_instruction": got,
-                        "expected_field": want,
+                        "expected_instruction": want,
                         "ok": ok,
                     }
                 )
                 if not ok:
                     failures.append(
-                        f"{hook['id']}: built dex starts with {got!r}, expected sget-object {want}"
+                        f"{hook['id']}: built dex starts with {got!r}, expected {want!r}"
                     )
                 continue
 

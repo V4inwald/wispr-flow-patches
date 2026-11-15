@@ -64,3 +64,22 @@ The count is the guard: a release that adds or drops a site fails both patches i
 answering half of them. A release that adds a site reading *another* package would be masked —
 that is the trade for surviving obfuscation, and it is written down here so the next reader knows
 to check it.
+
+## 4. The theme is hard-coded light
+
+There is no theme setting, and the app does not follow the system: with Android in dark mode it
+stays light. The reason is in `com/wispr/design/ThemeKt`:
+
+* `FlowAppTheme(Z Z Function2 Lyo0; I I)` takes the dark flag first. `MainActivity` calls it with
+  `dark = false` and the `dynamic` default, so the explicit path is light regardless of the
+  device;
+* the fallback path calls `isSystemInDarkTheme()`, which only runs when a caller leaves the first
+  argument at its default.
+
+Both dark palettes exist in the same class (`DarkColorScheme`, `dynamicDarkColorScheme`), so the
+scheme is implemented and merely never selected.
+
+Two hooks are therefore needed, not one: overwriting the parameter covers explicit callers,
+answering `isSystemInDarkTheme()` with `true` covers the screens that omit it. The second is
+located by the body (`Configuration.uiMode` and the `0x20` night bit) because R8 renames its class
+and method on every release.
