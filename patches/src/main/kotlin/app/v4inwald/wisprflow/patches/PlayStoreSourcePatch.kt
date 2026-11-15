@@ -23,7 +23,6 @@ private val COMPATIBILITY_WISPR_FLOW = Compatibility(
     appIconColor = 0xFF1F1F1F.toInt(),
     signatures = setOf("0f0f93d294c479ccd0ddce1bad232af5640c1faaa468612869c2208d7714c432"),
     targets = listOf(AppTarget(version = "2.6.2", minSdk = 33)),
-    isLegacy = false,
 )
 
 /**
