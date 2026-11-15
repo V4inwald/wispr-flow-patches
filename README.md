@@ -40,7 +40,25 @@ itself, and it signs the patched app on your device. The result is the same two 
 ## Patches list
 
 <!-- PATCHES_START EXPANDED -->
-<!-- Do not edit by hand: release.yml regenerates this section from patches-list.json. -->
+> **[v1.1.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.1.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
+<details open>
+<summary>📦 Wispr Flow&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
+<br>
+
+**Package name:** `com.wispr.flowapp`
+
+**🎯 Supported versions:**
+
+| 2.6.2 |
+| :---: |
+
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Play Store install source](#play-store-install-source) | Reports the app as installed from the Play Store, so the bundled Play licensing check accepts a re-signed build. |  |
+| [Unlimited words](#unlimited-words) | Removes the free-plan weekly word limit, so dictation keeps working past the quota. |  |
+
+</details>
+
 <!-- PATCHES_END -->
 
 ## Requirements for the scripted pipeline
