@@ -12,7 +12,14 @@ patches {
     }
 }
 
+// Separate configuration so gson is available at runtime for the
+// generatePatchesList task but never bundled into the .mpp.
+val patchListGeneratorClasspath = configurations.create("patchListGeneratorClasspath")
+
 dependencies {
+    compileOnly(libs.gson)
+    patchListGeneratorClasspath(libs.gson)
+
     implementation(libs.morphe.patches.library)
 }
 
@@ -22,8 +29,8 @@ tasks {
 
         dependsOn(build)
 
-        classpath = sourceSets["main"].runtimeClasspath
-        mainClass.set("app.morphe.util.PatchListGeneratorKt")
+        classpath = sourceSets["main"].runtimeClasspath + patchListGeneratorClasspath
+        mainClass.set("util.PatchListGeneratorKt")
     }
 
     // Used by gradle-semantic-release-plugin.

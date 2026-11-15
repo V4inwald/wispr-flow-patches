@@ -10,6 +10,9 @@
 build/
 out/
 
+# Private key that signs the patch bundle
+morphe-signing.key
+
 # Gradle / Node (the Morphe bundle)
 .gradle/
 *.mpp

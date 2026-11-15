@@ -10,32 +10,56 @@ Patches for the **Wispr Flow** Android app (`com.wispr.flowapp`), published in t
 The repository contains **no application code**: no APK, no DEX, no decompiled sources. It
 carries tooling, the reverse-engineering evidence behind each hook, and the patches themselves.
 
-| Patch | What it changes | Standalone | Morphe | Target |
-|---|---|---|---|---|
-| `unlimited-words` | stops the free-plan weekly word quota from gating dictation | yes | yes | 2.6.2 |
-| `play-store-source` | reports the app as installed by the Play Store | yes | yes | 2.6.2 |
-
-Both are needed on a re-signed build: the app ships Play licensing, and without the second
-patch it refuses to run. [`WHY.md`](WHY.md) explains that chain and why spoofing the installer
-is the honest fix rather than a workaround.
+Both patches are needed on a re-signed build: the app ships Play licensing, and without the
+second patch it refuses to run. [`WHY.md`](WHY.md) explains that chain and why spoofing the
+installer is the honest fix rather than a workaround.
 
 ## Patch on the phone with Morphe
 
-This is the short path: nothing to build, nothing to transfer.
+The short path: nothing to build, nothing to transfer.
 
-1. Install [Morphe](https://morphe.software) and open **Sources**, then **Add source**.
-2. Add the repository by its URL: `https://morphe.software/add-source?github=V4inwald/wispr-flow-patches`
-   (or paste `V4inwald/wispr-flow-patches` where the manager asks for a repository).
-3. Pick Wispr Flow in Morphe, keep both patches enabled, and patch the APK the manager selects.
+<a href="https://morphe.software/add-source?github=V4inwald/wispr-flow-patches">
+  <img src=".github/assets/add-to-morphe.svg" alt="Add to Morphe" height="48">
+</a>
+
+Or manually: install [Morphe](https://morphe.software), open **Sources** → **Add source**, and
+paste `V4inwald/wispr-flow-patches`.
+
+Then pick Wispr Flow in Morphe, keep both patches enabled, and patch the input the manager
+selects.
 
 Morphe builds the bundle from [`patches/src`](patches/src) through the
-[`app.morphe.patches`](settings.gradle.kts) plugin and publishes it as a signed release asset;
-[`patches-bundle.json`](patches-bundle.json) is what the manager reads to find that asset. The
-signing key of the first bundle you install is pinned, so a later release signed with another key
-is refused.
+[`app.morphe.patches`](settings.gradle.kts) plugin and publishes it as a release asset;
+[`patches-bundle.json`](patches-bundle.json) is what the manager reads to find that asset. Every
+release is signed with the key in [`morphe-signing.pub`](morphe-signing.pub): the manager pins the
+key of the first bundle you install, and refuses a later release signed with another one.
 
 Two things the manager does that the scripted pipeline does not: it handles the split bundle
-itself, and it does the signing on your device. The result is the same two hooks.
+itself, and it signs the patched app on your device. The result is the same two hooks.
+
+## Patches list
+
+<!-- PATCHES_START EXPANDED -->
+> **[v1.1.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.1.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
+<details open>
+<summary>📦 Wispr Flow&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
+<br>
+
+**Package name:** `com.wispr.flowapp`
+
+**🎯 Supported versions:**
+
+| 2.6.2 |
+| :---: |
+
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Play Store install source](#play-store-install-source) | Reports the app as installed from the Play Store, so the bundled Play licensing check accepts a re-signed build. |  |
+| [Unlimited words](#unlimited-words) | Removes the free-plan weekly word limit, so dictation keeps working past the quota. |  |
+
+</details>
+
+<!-- PATCHES_END -->
 
 ## Requirements for the scripted pipeline
 
@@ -87,7 +111,7 @@ patches/src/       the Kotlin patches the Morphe bundle is built from
 scripts/           bootstrap, preflight, decompile, apply, repack, sign, verify
 tools/             downloaded toolchain and local keystore (gitignored)
 tests/             unit tests over synthetic fixtures — no APK, no toolchain needed
-.github/workflows/ build the bundle on pull requests, release it on main
+.github/workflows/ build the bundle on pull requests and dev, release it on main and dev
 ```
 
 The two forms read from one source of truth each — the JSON manifest for the scripted pipeline,
@@ -104,6 +128,13 @@ What is claimed here is what is observed offline: unit tests, a full build, a ch
 injected instructions in the built dex, and a check that the signed bundle is complete and
 single-signed. Device behaviour — does the app launch, does dictation survive past the quota —
 is the one thing no tool in this container can certify, and is not claimed.
+
+## Development
+
+`dev` is where changes land; every `feat:`/`fix:` there publishes a pre-release that Morphe shows
+when pre-releases are enabled. When `dev` is ready it is merged into `main` by a pull request, and
+that merge publishes the stable release. Commits follow Conventional Commits; `chore:` produces no
+release.
 
 ## Licence
 

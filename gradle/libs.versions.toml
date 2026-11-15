@@ -1,13 +1,14 @@
 [versions]
-morphe-patcher = "1.14.0"
-morphe-patches-library = "1.9.0-dev.4"
-# Tracking https://github.com/google/smali/issues/100.
-smali = "d92701d947"
-annotation = "1.10.0"
+morphe-patcher = "2.3.0"
+morphe-patches-library = "2.2.0-dev.4"
+#noinspection GradleDependency
+smali = "4220ae75f7"
+gson = "2.15.0"
 
 [libraries]
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
-
-[plugins]
-android-library = { id = "com.android.library" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+# The Gradle plugin adds the dependency during the build; this declaration exists only so
+# dependabot can offer patcher updates.
+#noinspection UnusedVersionCatalogEntry
+morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }

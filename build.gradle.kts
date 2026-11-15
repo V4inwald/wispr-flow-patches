@@ -1,3 +1,1 @@
-plugins {
-    alias(libs.plugins.android.library) apply false
-}
+// Root build configuration for wispr-flow-patches
