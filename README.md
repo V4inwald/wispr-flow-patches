@@ -40,11 +40,7 @@ itself, and it signs the patched app on your device. The result is the same two 
 ## Patches list
 
 <!-- PATCHES_START EXPANDED -->
-<<<<<<< HEAD
-> **[v1.2.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.2.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
-=======
-> **[v1.2.0](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.2.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
->>>>>>> origin/main
+> **[v1.3.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.3.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
 <details open>
 <summary>📦 Wispr Flow&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
 <br>
@@ -53,7 +49,7 @@ itself, and it signs the patched app on your device. The result is the same two 
 
 **🎯 Supported versions:**
 
-| 2.6.2 |
+| 2.8.7 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |

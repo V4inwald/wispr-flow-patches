@@ -1,3 +1,9 @@
+## [1.3.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.2.0...v1.3.0-dev.1) (2026-11-15)
+
+### ✨ New Features
+
+* re-derive both patches on 2.8.7 ([05cd733](https://github.com/V4inwald/wispr-flow-patches/commit/05cd733d1bed14f7a7bf0dc014408bb98126468f))
+
 <<<<<<< HEAD
 ## [1.2.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.1.0...v1.2.0-dev.1) (2026-11-15)
 =======
