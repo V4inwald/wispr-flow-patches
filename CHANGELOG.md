@@ -1,3 +1,13 @@
+## [1.3.0-dev.2](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-11-15)
+
+### ✨ New Features
+
+* force the app's own interface into dark ([187fdbb](https://github.com/V4inwald/wispr-flow-patches/commit/187fdbb1038a55ed99a2b5db9beaca851d85a2fc))
+
+### 🐛 Bug Fixes
+
+* **bundle:** import returnEarly from the patcher ([c99d992](https://github.com/V4inwald/wispr-flow-patches/commit/c99d992292971bc40f01b91392e5d9769f03983e))
+
 ## [1.3.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.2.0...v1.3.0-dev.1) (2026-11-15)
 
 ### ✨ New Features

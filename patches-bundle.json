@@ -1,8 +1,8 @@
 {
-  "created_at": "2026-11-15T05:04:22",
-  "description": "## [1.3.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.2.0...v1.3.0-dev.1) (2026-11-15)\n\n### ✨ New Features\n\n* re-derive both patches on 2.8.7 ([05cd733](https://github.com/V4inwald/wispr-flow-patches/commit/05cd733d1bed14f7a7bf0dc014408bb98126468f))",
-  "download_url": "https://github.com/V4inwald/wispr-flow-patches/releases/download/v1.3.0-dev.1/patches-1.3.0-dev.1.mpp",
+  "created_at": "2026-11-15T05:49:39",
+  "description": "## [1.3.0-dev.2](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-11-15)\n\n### ✨ New Features\n\n* force the app's own interface into dark ([187fdbb](https://github.com/V4inwald/wispr-flow-patches/commit/187fdbb1038a55ed99a2b5db9beaca851d85a2fc))\n\n### 🐛 Bug Fixes\n\n* **bundle:** import returnEarly from the patcher ([c99d992](https://github.com/V4inwald/wispr-flow-patches/commit/c99d992292971bc40f01b91392e5d9769f03983e))",
+  "download_url": "https://github.com/V4inwald/wispr-flow-patches/releases/download/v1.3.0-dev.2/patches-1.3.0-dev.2.mpp",
   "signature_download_url": "",
-  "version": "1.3.0-dev.1",
+  "version": "1.3.0-dev.2",
   "public_key": "8FP2gX5Xo1QHoc0mYRcxKKKaywAZjEnHy+SB+8wcPbc="
 }

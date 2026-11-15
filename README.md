@@ -40,9 +40,9 @@ itself, and it signs the patched app on your device. The result is the same two 
 ## Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.3.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.3.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;2 patches total
+> **[v1.3.0-dev.2](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.3.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;3 patches total
 <details open>
-<summary>📦 Wispr Flow&nbsp;&nbsp;•&nbsp;&nbsp;2 patches</summary>
+<summary>📦 Wispr Flow&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
 <br>
 
 **Package name:** `com.wispr.flowapp`
@@ -54,6 +54,7 @@ itself, and it signs the patched app on your device. The result is the same two 
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
+| [Dark theme](#dark-theme) | Forces the app's own interface into its dark colour scheme, which the app never offers. |  |
 | [Play Store install source](#play-store-install-source) | Reports the app as installed from the Play Store, so the bundled Play licensing check accepts a re-signed build. |  |
 | [Unlimited words](#unlimited-words) | Removes the free-plan weekly word limit, so dictation keeps working past the quota. |  |
 
