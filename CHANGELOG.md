@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+## [1.2.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.1.0...v1.2.0-dev.1) (2026-11-15)
+=======
 ## [1.2.0](https://github.com/V4inwald/wispr-flow-patches/compare/v1.1.0...v1.2.0) (2026-11-15)
+>>>>>>> origin/main
 
 ### ✨ New Features
 

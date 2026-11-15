@@ -47,7 +47,11 @@ A hook exists in two places by design: the JSON manifest drives the scripted pip
 patch drives the bundle. Change both in the same commit, and keep the `expect` counts and the
 fingerprints equally strict.
 
-Commits: Conventional Commits, imperative, ≤72-character summary, body explains why.
+Branches: `dev` is the working branch and publishes pre-releases; `main` only receives merged pull
+requests and publishes stable releases. Never commit directly to `main`, never squash the merge.
+
+Commits: Conventional Commits, imperative, ≤72-character summary, body explains why. `feat:` and
+`fix:` cut a release; `chore:` and `docs:` do not.
 
 ## Reporting
 
