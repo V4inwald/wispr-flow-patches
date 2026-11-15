@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "patches": [
     {
       "name": "Play Store install source",
@@ -10,17 +10,19 @@
       "compatiblePackages": [
         {
           "packageName": "com.wispr.flowapp",
-          "name": null,
-          "description": null,
-          "apkFileType": null,
-          "appIconColor": null,
-          "signatures": null,
+          "name": "Wispr Flow",
+          "description": "Dictation app that inserts text with an accessibility service.",
+          "apkFileType": "APKM",
+          "appIconColor": "#1F1F1F",
+          "signatures": [
+            "0f0f93d294c479ccd0ddce1bad232af5640c1faaa468612869c2208d7714c432"
+          ],
           "targets": [
             {
               "version": "2.6.2",
               "versionCodes": null,
               "isExperimental": false,
-              "minSdk": null,
+              "minSdk": 33,
               "description": null
             }
           ]
@@ -36,17 +38,19 @@
       "compatiblePackages": [
         {
           "packageName": "com.wispr.flowapp",
-          "name": null,
-          "description": null,
-          "apkFileType": null,
-          "appIconColor": null,
-          "signatures": null,
+          "name": "Wispr Flow",
+          "description": "Dictation app that inserts text with an accessibility service.",
+          "apkFileType": "APKM",
+          "appIconColor": "#1F1F1F",
+          "signatures": [
+            "0f0f93d294c479ccd0ddce1bad232af5640c1faaa468612869c2208d7714c432"
+          ],
           "targets": [
             {
               "version": "2.6.2",
               "versionCodes": null,
               "isExperimental": false,
-              "minSdk": null,
+              "minSdk": 33,
               "description": null
             }
           ]
