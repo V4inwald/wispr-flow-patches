@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/V4inwald/wispr-flow-patches/compare/v1.1.0...v1.2.0) (2026-11-15)
+
+### ✨ New Features
+
+* move to the 2.x patch generation and sign every release ([a512c7c](https://github.com/V4inwald/wispr-flow-patches/commit/a512c7c3e8868b1f5a758e24c208ebfab2c54be4))
+
 ## [1.1.0-dev.1](https://github.com/V4inwald/wispr-flow-patches/compare/v1.0.0...v1.1.0-dev.1) (2026-11-15)
 
 ### ✨ New Features
