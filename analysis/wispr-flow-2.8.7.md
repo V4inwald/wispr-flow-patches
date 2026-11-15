@@ -83,3 +83,21 @@ Two hooks are therefore needed, not one: overwriting the parameter covers explic
 answering `isSystemInDarkTheme()` with `true` covers the screens that omit it. The second is
 located by the body (`Configuration.uiMode` and the `0x20` night bit) because R8 renames its class
 and method on every release.
+
+**Neither is enough, and the truth is worse than "the theme is unused".** The interface does not
+paint from `MaterialTheme` at all: it reads 60 fixed constants from `com/wispr/design/ColorKt`,
+always through a per-constant getter, and `res/values-night/` holds only AppCompat styles. Forcing
+the scheme changed nothing visible, exactly as the vendor's missing setting suggests.
+
+### What was tried and withdrawn
+
+A patch that repainted the palette was derived and shipped as a pre-release: 38 getters of
+`ColorKt` returned dark values, with surfaces raised and the neutral ramp inverted so text stayed
+readable. It compiled and passed every offline check — the built dex did return the new colours —
+and **the app crashed on launch**. No root cause was established; the plausible explanation is that
+a getter whose body is not the plain `sget-wide`/`return-wide` shape took a `const-wide` where
+something else was expected, which yields a class that fails verification.
+
+The patch was removed rather than debugged further, by decision of the person testing it. The
+conclusion that survives: this app has no dark theme to switch on, only a palette that would have
+to be rewritten, and any attempt has to be validated on a device before it is published.
