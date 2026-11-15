@@ -315,8 +315,16 @@ class ManifestTest(unittest.TestCase):
         # A hook that returns something short-circuits the method and must say so.
         # A hook on a void method only injects instructions, so no return is expected.
         if returned != "V":
-            assert ("return-object" if returned.startswith("L") else "return ") in hook["replacement"], (
-                f"{hook['id']}: replacement does not return a {returned}"
+            opcode = {
+                "J": "return-wide",
+                "D": "return-wide",
+                "F": "return",
+                "I": "return",
+                "Z": "return",
+                "L": "return-object",
+            }[returned[0]]
+            assert opcode in hook["replacement"], (
+                f"{hook['id']}: replacement does not end with {opcode} for a {returned}"
             )
         # the anchor must be part of the method body, not the method header
         assert hook["anchor"].strip() != hook["method"].strip()

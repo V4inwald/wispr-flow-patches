@@ -8,7 +8,9 @@ package app.v4inwald.wisprflow.patches
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.returnEarly
 import app.v4inwald.wisprflow.patches.Constants.COMPATIBILITY_WISPR_FLOW
@@ -52,13 +54,15 @@ internal object IsSystemInDarkThemeFingerprint : Fingerprint(
     ),
 )
 
+private const val COLOR_CLASS = "Lcom/wispr/design/ColorKt;"
+
 /**
- * Forces the app's own interface into its dark colour scheme.
+ * Forces the app's own interface into a dark palette.
  *
- * Two operations, because the theme is reached two ways: screens that pass `dark = false` are
- * covered by overwriting the parameter, and screens that leave it to the system are covered by
- * answering the system question with `true`. The app offers no theme setting, so nothing is
- * being overridden but its own hard-coded light default.
+ * Three operations, because the theme is reached three ways: screens that pass `dark = false`
+ * are covered by overwriting the parameter, screens that leave it to the system by answering the
+ * system question with `true`, and every screen that paints from the fixed palette by replacing
+ * the colour each getter returns.
  */
 @Suppress("unused")
 val darkThemePatch =
@@ -73,5 +77,14 @@ val darkThemePatch =
             FlowAppThemeFingerprint.method.addInstructions(0, "const/4 p0, 0x1")
 
             IsSystemInDarkThemeFingerprint.method.returnEarly(true)
+
+            // The palette: one getter per constant, so overriding the getter repaints every use.
+            val colorClass = mutableClassDefBy(COLOR_CLASS)
+            DARK_PALETTE.forEach { (constant, value) ->
+                val getter = "get" + constant.replaceFirstChar { it.uppercase() }
+                val method = colorClass.methods.firstOrNull { it.name == getter }
+                    ?: error("ColorKt has no $constant")
+                method.replaceInstruction(0, "const-wide v0, $value")
+            }
         }
     }

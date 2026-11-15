@@ -1,41 +1,56 @@
 # Dark theme
 
-Forces the app's own interface into the dark colour scheme it already ships but never selects.
+Repaints the app's own interface dark. The app has no theme setting, and it does not follow the
+system either: with Android in dark mode it stays light.
 
 * **Package**: `com.wispr.flowapp`
 * **Target version**: 2.8.7
 * **Evidence**: [`analysis/wispr-flow-2.8.7.md`](../../analysis/wispr-flow-2.8.7.md) §4
 
-## What the app does without the patch
+## Why the Compose theme is not enough
 
-There is no theme setting, and the app does not follow the system either: with Android in dark
-mode, the app stays light. Every screen composes under `FlowAppTheme(dark, dynamic, content)`
-(`com/wispr/design/ThemeKt`), and the two ways of reaching it both end light:
+Every screen composes under `FlowAppTheme(dark, dynamic, content)` (`com/wispr/design/ThemeKt`),
+and its dark palettes exist (`DarkColorScheme`, `dynamicDarkColorScheme`). Forcing that flag was
+the first attempt, and it changed nothing visible: the app's interface does not paint from
+`MaterialTheme`.
 
-* `MainActivity` passes `dark = false` explicitly, so the system setting is never consulted;
-* screens that omit the argument fall back to Compose's `isSystemInDarkTheme()`, which is only
-  reached when the caller leaves the default in place.
+It paints from `com/wispr/design/ColorKt`, a class of **60 fixed constants** — `Neutral50` to
+`Neutral900`, `SurfaceLight`, `BottomNavBarBackground`, `CardBorder`, `ProfileCardBackground`…
+98 interface files outside the bubble read them, always through one getter each; no field is read
+directly. `res/values-night/` holds only AppCompat styles, and `values/colors.xml` has no night
+variant. There is no dark theme to switch on, which is why the app offers no setting.
 
-The dark palettes are not missing — `DarkColorScheme` and `dynamicDarkColorScheme` are both
-defined in the same class. They are simply never chosen.
+## What the patch does
 
-## What the patch changes
+Three groups of hooks:
 
-Two instructions, one per path:
-
-| Hook | Where | Effect |
+| Group | Count | Effect |
 |---|---|---|
-| `FlowAppTheme.forceDark` | first instruction of `FlowAppTheme` | `const/4 p0, 0x1`, so an explicit `false` becomes `true` |
-| `isSystemInDarkTheme` | first instruction of the Compose helper | `return true`, so the default is dark too |
+| `FlowAppTheme.forceDark` | 1 | `const/4 p0, 0x1`, so a screen passing `dark = false` becomes dark |
+| `isSystemInDarkTheme` | 1 | `return true`, so screens leaving the argument to the system agree |
+| `palette.*` | 38 | each colour getter returns a dark value instead of the constant |
 
-The second hook is found through the body — reading `Configuration.uiMode` and testing the night
-bit — because R8 renames that class and method on every release. It also covers the paywalls and
-any component that follows the system.
+The first two keep the few Material components that do read the scheme (the segmented picker on
+the Style screen is one) in step with the rest.
 
-## Limits
+**The palette is one table.** [`palette.py`](palette.py) holds every colour: its current value,
+its dark value, and what it paints. The script writes the hook list here and
+`DarkPalette.kt` in the patch sources, so the two implementations cannot drift. Edit the table,
+re-run `python3 patches/dark-theme/palette.py`, and the manifest must be regenerated the same way.
 
-* **The interface only.** The floating bubble is a separate service window; it keeps its own
-  appearance. Nothing about the dictation behaviour changes.
-* **Composed colours, not hard-coded ones.** Screens that paint a literal light colour outside
-  the theme will stay light. This is the one thing that needs a device to confirm.
-* **Version-specific.** Both hooks are tied to 2.8.7 and fail rather than misapply elsewhere.
+Only surfaces, borders, neutrals and indicators are remapped. Accents (`AccentPurple`, `LinkBlue`,
+`BetaGreen`, `StatsOrange`, `flowBubbleColor`…) keep their identity, so a green success badge stays
+green; the neutrals carry the text, and their ramp is inverted so body text ends up light
+(`Neutral900` `#191521` → `#F5F2F8`).
+
+## Limits — read before reporting a bug
+
+* **This is a repaint, not the vendor's dark theme.** There isn't one to reuse. Some contrast
+  choices are ours, and a screen that paints a literal colour outside this palette will stay
+  light.
+* **The bubble is untouched.** It is a separate service window; the user asked for the app
+  interface only.
+* **It needs a device to judge.** The build checks that the instructions are in the dex and that
+  the palette table is applied; it cannot say whether the result looks right.
+* **Version-specific.** `ColorKt`, `FlowAppTheme` and the obfuscated `isSystemInDarkTheme` are tied
+  to 2.8.7. Each hook fails loudly rather than misapplying elsewhere.
