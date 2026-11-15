@@ -40,7 +40,7 @@ itself, and it signs the patched app on your device. The result is the same two 
 ## Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.3.0-dev.2](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.3.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;3 patches total
+> **[v1.3.0-dev.3](https://github.com/V4inwald/wispr-flow-patches/releases/tag/v1.3.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;3 patches total
 <details open>
 <summary>📦 Wispr Flow&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
 <br>

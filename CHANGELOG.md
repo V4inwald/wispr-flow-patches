@@ -1,3 +1,9 @@
+## [1.3.0-dev.3](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.2...v1.3.0-dev.3) (2026-11-15)
+
+### ✨ New Features
+
+* **dark-theme:** repaint the fixed palette, not just the Compose scheme ([1825cac](https://github.com/V4inwald/wispr-flow-patches/commit/1825cac9c67ec6bf72ff91ca575bd9aa7c062fd5))
+
 ## [1.3.0-dev.2](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.1...v1.3.0-dev.2) (2026-11-15)
 
 ### ✨ New Features
