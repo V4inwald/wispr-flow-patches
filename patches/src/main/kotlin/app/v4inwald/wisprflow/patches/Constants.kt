@@ -21,6 +21,6 @@ internal object Constants {
         apkFileType = ApkFileType.XAPK,
         appIconColor = 0x1F1F1F,
         signatures = setOf("0f0f93d294c479ccd0ddce1bad232af5640c1faaa468612869c2208d7714c432"),
-        targets = listOf(AppTarget(version = "2.6.2", minSdk = 33)),
+        targets = listOf(AppTarget(version = "2.8.7", minSdk = 33)),
     )
 }

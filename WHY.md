@@ -52,7 +52,7 @@ It does not claim:
   as a gate.
 
 The spoof is also *narrow in mechanism*: it keeps the platform call and replaces only the
-value returned by it, in the seven places that read it. A call that the platform would
+value returned by it, in every place that reads it. A call that the platform would
 have answered normally still runs; a value the app compares still compares.
 
 ## 4. Why this is coherent

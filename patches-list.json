@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.2.0",
+  "version": "1.3.0-dev.4",
   "patches": [
     {
       "name": "Play Store install source",
@@ -20,7 +20,7 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "2.6.2",
+              "version": "2.8.7",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": 33,
@@ -49,7 +49,7 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "2.6.2",
+              "version": "2.8.7",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": 33,

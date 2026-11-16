@@ -4,13 +4,15 @@ Removes the free-plan weekly word quota, so dictation keeps working past the lim
 being refused.
 
 * **Package**: `com.wispr.flowapp`
-* **Target version**: 2.6.2 (see `compatibility` in [`patch.json`](patch.json))
-* **Evidence**: [`analysis/wispr-flow-2.6.2.md`](../../analysis/wispr-flow-2.6.2.md) §4
+* **Target version**: 2.8.7 (see `compatibility` in [`patch.json`](patch.json))
+* **Evidence**: [`analysis/wispr-flow-2.6.2.md`](../../analysis/wispr-flow-2.6.2.md) §4,
+  [`analysis/wispr-flow-2.8.7.md`](../../analysis/wispr-flow-2.8.7.md) §1
 
 ## What the app does without the patch
 
 `WordLimitPolicy` (smali: `com/wispr/payment/wordlimit/WordLimitPolicy`) turns the plan and the
-weekly word count into a state:
+weekly limits into a state. The thresholds come from the backend as a `WeeklyWordLimits` object;
+the defaults below are the ones observed in 2.6.2 and are no longer inlined as constants.
 
 | Words used in the week | State | Result |
 |---|---|---|
@@ -65,5 +67,5 @@ is a no-op. Reverting restores the original files byte for byte.
 * **It needs [`play-store-source`](../play-store-source/) to run.** The app ships Google Play
   licensing, which rejects a re-signed build before any of this is reached. This patch is the
   reason to patch; the other one is the reason the app starts.
-* **It is version-specific.** The anchors are literal smali from 2.6.2. A new app version means a
+* **It is version-specific.** The anchors are literal smali from 2.8.7. A new app version means a
   new anchor, and the patcher will refuse rather than patch the wrong thing.

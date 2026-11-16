@@ -15,7 +15,7 @@ private const val POLICY_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitPolicy;"
 private const val ENGINE_CLASS = "Lcom/wispr/payment/wordlimit/WordLimitEngine;"
 
 /**
- * `computeState(Z I J)` maps the plan plus the weekly word count onto
+ * `computeState(Z I WeeklyWordLimits J)` maps the plan plus the weekly word limits onto
  * Warning / Exhausted / HardCapped. `computeGate` turns that state into a `DictationGate`, and
  * `DictationStartGate` refuses the dictation on anything but `Allow`.
  */
@@ -23,7 +23,7 @@ internal object WordLimitPolicyComputeStateFingerprint : Fingerprint(
     definingClass = POLICY_CLASS,
     name = "computeState",
     returnType = "Lcom/wispr/payment/wordlimit/WordLimitState;",
-    parameters = listOf("Z", "I", "J"),
+    parameters = listOf("Z", "I", "Lcom/wispr/payment/wordlimit/WeeklyWordLimits;", "J"),
 )
 
 /**

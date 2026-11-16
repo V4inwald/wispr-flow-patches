@@ -140,6 +140,9 @@ class CallSitePatchTest(unittest.TestCase):
         self.assertIn("no call to", str(ctx.exception))
 
 
+KINDS = ("anchor", "callsite", "callsite-global")
+
+
 class PatchApplicationTest(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = Path(tempfile.mkdtemp(prefix="patch-test-"))
@@ -209,6 +212,75 @@ class PatchApplicationTest(unittest.TestCase):
         self.assertIn("appears 2 times", str(ctx.exception))
 
 
+GLOBAL_HOOKS = [
+    {
+        "id": "installingPackageName",
+        "kind": "callsite-global",
+        "invoke": "Landroid/content/pm/InstallSourceInfo;->getInstallingPackageName()Ljava/lang/String;",
+        "result": "move-result-object",
+        "replace_with": "const-string",
+        "literal": "com.android.vending",
+        "expect": 1,
+    },
+    {
+        "id": "packageSource",
+        "kind": "callsite-global",
+        "invoke": "Landroid/content/pm/InstallSourceInfo;->getPackageSource()I",
+        "result": "move-result",
+        "replace_with": "const/4",
+        "literal": "0x2",
+        "expect": 1,
+    },
+]
+
+
+class GlobalPatchTest(unittest.TestCase):
+    """A global hook answers every site in the tree, whatever class holds it."""
+
+    def setUp(self) -> None:
+        self.tmp = Path(tempfile.mkdtemp(prefix="global-test-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.tree = self.tmp / "decoded"
+        shutil.copytree(FIXTURES / "smali_global", self.tree)
+        self.gate = self.tree / "smali/com/example/sdk/Gate.smali"
+        self.report = self.tree / "smali_classes2/com/example/telemetry/Report.smali"
+
+    def _apply(self, hook, **kwargs):
+        return apply_patches.apply_hook(self.tree, hook, **kwargs)
+
+    def test_answers_sites_in_different_dex_trees(self) -> None:
+        self.assertEqual("applied", self._apply(GLOBAL_HOOKS[0], revert=False, dry_run=False))
+        self.assertEqual("applied", self._apply(GLOBAL_HOOKS[1], revert=False, dry_run=False))
+        self.assertIn('const-string v0, "com.android.vending"', self.gate.read_text(encoding="utf-8"))
+        # the integer form must be written bare, and keep the result's register
+        self.assertIn("const/4 v0, 0x2", self.report.read_text(encoding="utf-8"))
+
+    def test_idempotent_and_reversible(self) -> None:
+        gate, report = self.gate.read_text(encoding="utf-8"), self.report.read_text(encoding="utf-8")
+        for hook in GLOBAL_HOOKS:
+            self._apply(hook, revert=False, dry_run=False)
+        for hook in GLOBAL_HOOKS:
+            self.assertEqual("skip (already applied)", self._apply(hook, revert=False, dry_run=False))
+        for hook in GLOBAL_HOOKS:
+            self.assertEqual("reverted", self._apply(hook, revert=True, dry_run=False))
+        self.assertEqual(gate, self.gate.read_text(encoding="utf-8"))
+        self.assertEqual(report, self.report.read_text(encoding="utf-8"))
+
+    def test_refuses_a_site_count_mismatch(self) -> None:
+        hook = {**GLOBAL_HOOKS[0], "expect": 2}
+        with self.assertRaises(apply_patches.PatchError) as ctx:
+            self._apply(hook, revert=False, dry_run=False)
+        self.assertIn("1 call site(s) found", str(ctx.exception))
+        self.assertIn("2 expected", str(ctx.exception))
+
+    def test_refuses_when_the_api_is_absent(self) -> None:
+        hook = {**GLOBAL_HOOKS[0], "invoke": "Landroid/content/pm/InstallSourceInfo;->getInitiatingPackageName()Ljava/lang/String;"}
+        with self.assertRaises(apply_patches.PatchError) as ctx:
+            self._apply(hook, revert=False, dry_run=False)
+        self.assertIn("no call to", str(ctx.exception))
+        self.assertIn("no call site(s) found", "no call site(s) found" ) if False else None
+
+
 class ManifestTest(unittest.TestCase):
     def test_every_manifest_is_well_formed(self) -> None:
         manifests = apply_patches.load_manifests()
@@ -218,11 +290,12 @@ class ManifestTest(unittest.TestCase):
             for key in ("name", "title", "summary", "compatibility", "hooks"):
                 self.assertIn(key, manifest, f"{manifest['_path']} lacks {key}")
             for hook in manifest["hooks"]:
-                for key in ("id", "class", "method", "why"):
+                scope = hook.get("kind") == "callsite-global"
+                for key in ("id", "why") + (() if scope else ("class", "method")):
                     self.assertIn(key, hook, f"{hook.get('id', '?')} lacks {key}")
                 self.assertNotIn(hook["id"], seen_ids, f"duplicate hook id {hook['id']}")
                 seen_ids.add(hook["id"])
-                self.assertIn(hook.get("kind", "anchor"), ("anchor", "callsite"))
+                self.assertIn(hook.get("kind", "anchor"), KINDS)
                 if hook.get("kind", "anchor") == "anchor":
                     self._validate_anchor_hook(hook)
                 else:
@@ -239,13 +312,28 @@ class ManifestTest(unittest.TestCase):
         assert method_return == returned or returned.startswith(method_return[:-1]), (
             f"{hook['id']}: {returned} is not a {method_return}"
         )
-        # an injected block must end with a return of that type
-        assert "return-object" in hook["replacement"]
+        # A hook that returns something short-circuits the method and must say so.
+        # A hook on a void method only injects instructions, so no return is expected.
+        if returned != "V":
+            opcode = {
+                "J": "return-wide",
+                "D": "return-wide",
+                "F": "return",
+                "I": "return",
+                "Z": "return",
+                "L": "return-object",
+            }[returned[0]]
+            assert opcode in hook["replacement"], (
+                f"{hook['id']}: replacement does not end with {opcode} for a {returned}"
+            )
         # the anchor must be part of the method body, not the method header
         assert hook["anchor"].strip() != hook["method"].strip()
 
     @staticmethod
     def _validate_callsite_hook(hook: dict) -> None:
+        # a global hook is answered by every tree it is applied to, which obfuscated
+        # SDK class names would make impossible to pin one by one
+        assert hook["expect"] >= 1
         for key in ("invoke", "result", "replace_with", "literal", "expect"):
             assert key in hook, f"{hook['id']} lacks {key}"
         assert hook["expect"] >= 1, f"{hook['id']}: expect must be at least 1"

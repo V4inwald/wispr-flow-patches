@@ -50,13 +50,19 @@ Leave the call in place and replace the result it produces. Use when an API is r
 several places and every read must answer the same way — the call still runs, only its value
 is overridden, and the register keeps its width.
 
+A `callsite` hook scoped to a class and a method is the right form when the target class has a
+meaningful name. `callsite-global` drops `class` and `method` and answers every matching site in
+the whole tree: use it for platform APIs read from vendored SDKs whose class names are obfuscated
+and change every release. `expect` then counts every site in the tree, and a mismatch fails the
+patch.
+
 | Field | Meaning |
 |---|---|
-| `class`, `method` | as above; the search is scoped to that method |
+| `class`, `method` | as above; the search is scoped to that method — omitted for `callsite-global` |
 | `invoke` | full descriptor of the called method |
 | `result` | `move-result-object`, `move-result` or `move-result-wide` |
 | `replace_with` | `const-string`, `const/4`, … — must be the result's width |
-| `literal` | the value to substitute |
+| `literal` | the value to substitute; quoted for `const-string`, bare otherwise (`0x2`) |
 | `expect` | exact number of sites in that method; a mismatch fails the patch |
 
 ## Rules
