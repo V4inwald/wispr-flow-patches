@@ -1,3 +1,16 @@
+## [1.3.0](https://github.com/V4inwald/wispr-flow-patches/compare/v1.2.0...v1.3.0) (2026-11-16)
+
+### ✨ New Features
+
+* **dark-theme:** repaint the fixed palette, not just the Compose scheme ([1825cac](https://github.com/V4inwald/wispr-flow-patches/commit/1825cac9c67ec6bf72ff91ca575bd9aa7c062fd5))
+* force the app's own interface into dark ([187fdbb](https://github.com/V4inwald/wispr-flow-patches/commit/187fdbb1038a55ed99a2b5db9beaca851d85a2fc))
+* re-derive both patches on 2.8.7 ([05cd733](https://github.com/V4inwald/wispr-flow-patches/commit/05cd733d1bed14f7a7bf0dc014408bb98126468f))
+
+### 🐛 Bug Fixes
+
+* **bundle:** import returnEarly from the patcher ([c99d992](https://github.com/V4inwald/wispr-flow-patches/commit/c99d992292971bc40f01b91392e5d9769f03983e))
+* **bundle:** republish the patch list without the withdrawn patch ([9c8bd22](https://github.com/V4inwald/wispr-flow-patches/commit/9c8bd227002520e28da786b2cbc858c8dd3153e7))
+
 ## [1.3.0-dev.4](https://github.com/V4inwald/wispr-flow-patches/compare/v1.3.0-dev.3...v1.3.0-dev.4) (2026-11-15)
 
 ### 🐛 Bug Fixes
